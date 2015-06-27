@@ -221,12 +221,6 @@
     //comps.weekdayは 1-7の値が取得できるので-1する
     NSString* weekDayStr = df.shortWeekdaySymbols[comps.weekday-1];
     NSLog(@"%@",weekDayStr);
-    if([weekDayStr isEqualToString:@"土"] || [weekDayStr isEqualToString:@"日"]){
-        self.timeLabel.font = [NSFont systemFontOfSize:15];
-        self.timeLabel.stringValue = @"土日は使用できません。(開発中)";
-        self.destinationLabel.stringValue = @"";
-        return;
-    }
     
     // 現在日付を取得
     NSDate *now = [NSDate date];
@@ -248,7 +242,13 @@
     //読み込むファイルパスを指定
     NSString* path = [bundle pathForResource:@"bus_data" ofType:@"plist"];
     NSDictionary* dic = [NSDictionary dictionaryWithContentsOfFile:path];
-    NSDictionary* weekdayData = [dic objectForKey:@"weekday"];
+    NSDictionary* weekdayData;
+    if([weekDayStr isEqualToString:@"土"] || [weekDayStr isEqualToString:@"日"]){
+        weekdayData = [dic objectForKey:@"holiday"];
+    }else{
+        weekdayData = [dic objectForKey:@"weekday"];
+    }
+    
     NSArray *items =[NSArray arrayWithArray:[weekdayData objectForKey:@"dataset"]];
     
     bool flg = false;
@@ -264,7 +264,6 @@
             NSString *bus_minute = [[str objectForKey:@"departure"] substringFromIndex:3];
             if((int)hour * 60 + (int)minute <= [bus_hour integerValue] * 60 + [bus_minute integerValue]){
                 
-                NSLog(@"hello");
                 flg = true;
                 self.timeLabel.font = [NSFont systemFontOfSize:35];
                 self.timeLabel.stringValue = [str objectForKey:@"departure"];
